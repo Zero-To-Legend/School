@@ -1,0 +1,53 @@
+# Environment variables (DO NOT commit)
+.env
+.env.local
+.env.production
+
+# Database
+*.db
+*.sqlite
+
+# Server uploads (optional - exclude if contains sensitive data)
+server/uploads/*
+!server/uploads/.gitkeep
+
+# Logs
+*.log
+logs/
+
+# Runtime
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Dependencies
+node_modules/
+jspm_packages/
+
+# Build outputs
+dist/
+dist-ssr/
+build/
+.tmp/
+.cache/
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary
+*.tmp
+*.temp
