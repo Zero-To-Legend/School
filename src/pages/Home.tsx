@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowRight, Users, BookOpen, Award, Globe, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { API_BASE } from '../api';
+import { fetchWithFallback, getImageUrl } from '../api';
 
 // Animated count-up hook
 function useCountUp(to: number, duration = 1200, start = 0) {
@@ -109,9 +109,11 @@ const Home = () => {
   // --- Student Testimonials State (Featured only for home page) ---
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   useEffect(() => {
-    fetch(`${API_BASE}/testimonials/featured`)
-      .then(res => res.json())
-      .then(setTestimonials);
+    const loadTestimonials = async () => {
+      const data = await fetchWithFallback(`${import.meta.env.VITE_API_BASE || 'http://localhost:5000/api'}/testimonials/featured`, 'testimonials');
+      if (data) setTestimonials(data);
+    };
+    loadTestimonials();
   }, []);
   const stats = [
     { icon: Users, value: '2,500+', label: 'Students' },
@@ -124,22 +126,26 @@ const Home = () => {
   const [features, setFeatures] = useState<Feature[]>([]);
   const [featuresLoading, setFeaturesLoading] = useState(true);
   useEffect(() => {
-    setFeaturesLoading(true);
-    fetch(`${API_BASE}/features`)
-      .then(res => res.json())
-      .then(data => setFeatures(Array.isArray(data) ? data : []))
-      .finally(() => setFeaturesLoading(false));
+    const loadFeatures = async () => {
+      setFeaturesLoading(true);
+      const data = await fetchWithFallback(`${import.meta.env.VITE_API_BASE || 'http://localhost:5000/api'}/features`, 'features');
+      setFeatures(Array.isArray(data) ? data : []);
+      setFeaturesLoading(false);
+    };
+    loadFeatures();
   }, []);
 
   // --- Latest News from Backend ---
   const [news, setNews] = useState<NewsItem[]>([]);
   const [newsLoading, setNewsLoading] = useState(true);
   useEffect(() => {
-    setNewsLoading(true);
-    fetch(`${API_BASE}/news?limit=3`)
-      .then(res => res.json())
-      .then((data) => setNews(Array.isArray(data) ? data : []))
-      .finally(() => setNewsLoading(false));
+    const loadNews = async () => {
+      setNewsLoading(true);
+      const data = await fetchWithFallback(`${import.meta.env.VITE_API_BASE || 'http://localhost:5000/api'}/news?limit=3`, 'news');
+      setNews(Array.isArray(data) ? data.slice(0, 3) : []);
+      setNewsLoading(false);
+    };
+    loadNews();
   }, []);
 
 

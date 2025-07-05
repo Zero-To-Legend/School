@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Clock, Download, Filter, AlertCircle, CalendarDays, User, RefreshCw, Search, X } from 'lucide-react';
-import { API_BASE } from '../../api';
+import { fetchWithFallback, getImageUrl } from '../../api';
 
 type Assignment = {
   _id: string;
@@ -34,15 +34,11 @@ const AssignmentsTab = () => {
   const fetchAssignments = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE}/assignments`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch assignments');
-      }
-      const data = await response.json();
+      const data = await fetchWithFallback(`${import.meta.env.VITE_API_BASE || 'http://localhost:5000/api'}/assignments`, 'assignments');
       
       // Filter out expired assignments
       const now = new Date();
-      const activeAssignments = data.filter((assignment: Assignment) => {
+      const activeAssignments = (Array.isArray(data) ? data : []).filter((assignment: Assignment) => {
         const deadline = new Date(assignment.deadline);
         return deadline > now;
       });
@@ -94,13 +90,8 @@ const AssignmentsTab = () => {
   const handleDownload = (assignment: Assignment) => {
     const link = document.createElement('a');
     
-    // Construct the full URL
-    let fileUrl = assignment.fileUrl;
-    if (!fileUrl.startsWith('http')) {
-      // Remove /api from API_BASE and add the file path
-      const baseUrl = API_BASE.replace('/api', '');
-      fileUrl = `${baseUrl}${assignment.fileUrl}`;
-    }
+    // Use the safe image URL helper
+    const fileUrl = getImageUrl(assignment.fileUrl) || assignment.fileUrl;
     
     link.href = fileUrl;
     link.download = `${assignment.title.replace(/[^a-zA-Z0-9]/g, '_')}.${assignment.fileType === 'pdf' ? 'pdf' : 'jpg'}`;
